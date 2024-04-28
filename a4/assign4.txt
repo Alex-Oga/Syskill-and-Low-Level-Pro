@@ -1,0 +1,24 @@
+https://ibiblio.org/gferg/ldp/GCC-Inline-Assembly-HOWTO
+https://www.programiz.com/c-programming/bitwise-operators
+
+Coding Rules:
+
+int Funct(arg1, arg2, ...) {
+	int var1 = Expr1;
+	...
+	int varM = ExprM;
+
+	varJ = ExprJ;
+	...
+	varJ = ExprJ;
+	return ExprR;
+}
+
+Each Expr is an expression using only the following:
+	1. Integer constants 0 through 255 (0xFF) inclusive. no big constants such as 0xffffffff
+	2. Function arguemnts and local variables (no global variables)
+	3. Unary integer operations ! ~
+	4. Binary integer operations & ^ | + << >>
+
+Not restricted to one operator per line 
+
