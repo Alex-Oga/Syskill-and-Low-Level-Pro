@@ -1,0 +1,1055 @@
+box
+https://www.geeksforgeeks.org/c-program-for-inserting-a-node-in-a-linked-list/
+https://www.includehelp.com/c-programming-questions/what-is-makefile.aspx
+https://stackoverflow.com/questions/12888845/using-pointers-instead-of-an-array
+
+calloc 
+malloc
+realloc
+https://www.geeksforgeeks.org/dynamic-memory-allocation-in-c-using-malloc-calloc-free-and-realloc/
+
+Entry *a = malloc(sizeof(Entry)*10);
+a->data = 1;
+a->name = "Nice";
+printf("%s", (a+1)->name);
+(a+1)->data = 2;
+(a+1)->name = "Spicy";
+ printf("%s", (a+1)->name);
+
+
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct EntryStruct {
+    int data;
+    char *name;
+} Entry;
+
+
+
+int main() {
+    int n;
+    Entry *a = malloc(sizeof(Entry)*n);
+    scanf("%d", &n);
+    for (int i = 0; i<n; i++) {
+        (a+i)->name = (char*)malloc(sizeof(char)*30);
+        scanf("%d %s", &(a+i)->data, (a+i)->name);
+    }
+    
+    
+    
+    for (int i=0; i<n; i++) {
+        printf("%d %s\n", (a+i)->data, (a+i)->name);
+    }
+    
+    return 0;
+}
+
+
+
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct EntryStruct {
+    int data;
+    char *name;
+} Entry;
+
+int compare(const Entry *a, const Entry *b) {
+    return a->data-b->data;
+}
+
+void sort(Entry *in, int vL, void *comparator) {
+    int swap = 1;
+    while (swap == 1) {
+        swap = 0;
+        for (int i=0; i<vL-1; i++) {
+            Entry *const ptr1 = (in+i);
+            Entry *const ptr2 = (in+i+1);
+            if (compare(ptr1, ptr2) > 0) {
+                swap = 1;
+                int one = (in+i)->data;
+                char* two = (in+i)->name;
+                (in+i)->data = (in+i+1)->data;
+                (in+i)->name = (in+i+1)->name;
+                (in+i+1)->data = one;
+                (in+i+1)->name = two;
+            }
+        }
+    }
+}
+
+int main() {
+    int n;
+    scanf("%d", &n);
+    Entry *a = malloc(sizeof(Entry)*n);
+    for (int i=0; i<n; i++) {
+        (a+i)->name = (char*)malloc(sizeof(char)*30);
+        scanf("%d %s", &(a+i)->data, (a+i)->name);
+    }
+    
+    sort(a, n, compare);
+    
+    for (int i=0; i<n; i++) {
+        printf("%d %s\n", (a+i)->data, (a+i)->name);
+    }
+    
+    return 0;
+}
+
+
+int main() {
+    Queue *q = NULL;
+    print(q);
+    push(&q, "a");
+    push(&q, "b");
+    push(&q, "c");
+    print(q);
+    while (!isEmpty(q)) {
+        char *items = pop(q);
+        printf("%s\n", items);
+        free(items);
+    }
+    char *items = pop(q);
+    assert(item == NULL);
+    push(&q, "d");
+    push(&q, "e");
+    push(&q, "f");
+    print(q);
+    delete(q);
+    print(q);
+    char *s = (char *)malloc(10);
+    strcpy(s, "Hello");
+    push(&q, s);
+    strcpy(s, "World")
+    push(&q, s);
+    char *t = pop(q);
+    printf("s = %s\n", s);
+    printf("t = %s\n", t);
+    free(t);
+    free(s);
+    free(q);
+    
+    return 0;
+}
+
+
+
+
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <assert.h>
+
+struct node_struct {
+    char *data;
+    struct node_struct *next;
+};
+
+typedef struct node_struct Node;
+
+struct stack_struct {
+    Node *head, *tail;
+};
+
+typedef struct stack_struct Stack;
+
+void push(Stack **q, char* word) {
+    if (*q == NULL) {
+        Stack *new_stack = malloc(sizeof(Stack));
+        new_stack->head = malloc(sizeof(Node));
+        new_stack->head->data = word;
+        new_stack->head->next = NULL;
+        (*q) = new_stack;
+        return;
+    }
+    Node* new_node = malloc(sizeof(Node));
+    new_node->data = word;
+    new_node->next = (*q)->head;
+    (*q)->head = new_node;
+}
+
+char *pop(Stack *q) {
+    if (q == NULL || q->head == NULL) {
+        return NULL;
+    }
+    char* str = q->head->data;
+    q->head = q->head->next;
+    return str;
+}
+
+int isEmpty(Stack *q) {
+    if (q == NULL || q->head == NULL) {
+        return 0;
+    }
+    return 1;
+}
+
+void print(Stack *q) {
+    if (q == NULL || q->head == NULL) {
+        printf("No items\n");
+        return;
+    }
+    Node *temp = q->head;
+    
+    while (temp != NULL) {
+        printf("%s\n", temp->data);
+        temp = temp->next;
+    }
+    return;
+}
+
+void delete(Stack** q) {
+    
+}
+
+int main() {
+    Stack *q = NULL;
+    print(q);
+    push(&q, "a");
+    push(&q, "b");
+    push(&q, "c");
+    print(q);
+    while (isEmpty(q) != 0) {
+        char *items = pop(q);
+        printf("%s\n", items);
+    }
+    char *items = pop(q);
+    assert(items == NULL);
+    push(&q, "d");
+    push(&q, "e");
+    push(&q, "f");
+    print(q);
+    
+    return 0;
+}
+
+
+
+
+
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <assert.h>
+
+struct node_struct {
+    char *data;
+    struct node_struct *next;
+};
+
+typedef struct node_struct Node;
+
+struct stack_struct {
+    Node *head, *tail;
+};
+
+typedef struct stack_struct Stack;
+
+void push(Stack **q, char* word) {
+    if (*q == NULL) {
+        Stack *new_stack = malloc(sizeof(Stack));
+        new_stack->head = malloc(sizeof(Node));
+        new_stack->head->data = word;
+        new_stack->head->next = NULL;
+        (*q) = new_stack;
+        return;
+    }
+    Node* new_node = malloc(sizeof(Node));
+    new_node->data = word;
+    new_node->next = (*q)->head;
+    (*q)->head = new_node;
+}
+
+char *pop(Stack *q) {
+    if (q == NULL || q->head == NULL) {
+        return NULL;
+    }
+    char* str = q->head->data;
+    q->head = q->head->next;
+    return str;
+}
+
+int isEmpty(Stack *q) {
+    if (q == NULL || q->head == NULL) {
+        return 0;
+    }
+    return 1;
+}
+
+void print(Stack *q) {
+    if (q == NULL || q->head == NULL) {
+        printf("No items\n");
+        return;
+    }
+    Node *temp = q->head;
+    
+    while (temp != NULL) {
+        printf("%s\n", temp->data);
+        temp = temp->next;
+    }
+    return;
+}
+
+void deletee(Stack** q) {
+    Node *temp = *q->head;
+    printf("%s\n", temp->data);
+}
+
+int main() {
+    Stack *q = NULL;
+    print(q);
+    push(&q, "a");
+    push(&q, "b");
+    push(&q, "c");
+    print(q);
+    while (isEmpty(q) != 0) {
+        char *items = pop(q);
+        printf("%s\n", items);
+    }
+    char *items = pop(q);
+    assert(items == NULL);
+    push(&q, "d");
+    push(&q, "e");
+    push(&q, "f");
+    print(q);
+    deletee(q);
+    
+    
+    return 0;
+}
+
+
+
+
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <assert.h>
+
+struct node_struct {
+    char *data;
+    struct node_struct *next;
+};
+
+typedef struct node_struct Node;
+
+struct stack_struct {
+    Node *head, *tail;
+};
+
+typedef struct stack_struct Stack;
+
+void push(Stack **q, char* word) {
+    if (*q == NULL) {
+        Stack *new_stack = malloc(sizeof(Stack));
+        new_stack->head = malloc(sizeof(Node));
+        new_stack->head->data = word;
+        new_stack->head->next = NULL;
+        (*q) = new_stack;
+        return;
+    }
+    Node* new_node = malloc(sizeof(Node));
+    new_node->data = word;
+    new_node->next = (*q)->head;
+    (*q)->head = new_node;
+}
+
+char *pop(Stack *q) {
+    if (q == NULL || q->head == NULL) {
+        return NULL;
+    }
+    char* str = q->head->data;
+    q->head = q->head->next;
+    return str;
+}
+
+int isEmpty(Stack *q) {
+    if (q == NULL || q->head == NULL) {
+        return 0;
+    }
+    return 1;
+}
+
+void print(Stack *q) {
+    if (q == NULL || q->head == NULL) {
+        printf("No items\n");
+        return;
+    }
+    Node *temp = q->head;
+    
+    while (temp != NULL) {
+        printf("%s\n", temp->data);
+        temp = temp->next;
+    }
+    return;
+}
+
+void delete(Stack** q) {
+    free(*q);
+    (*q) = NULL;
+}
+
+int main() {
+    Stack *q = NULL;
+    print(q);
+    push(&q, "a");
+    push(&q, "b");
+    push(&q, "c");
+    print(q);
+    while (isEmpty(q) != 0) {
+        char *items = pop(q);
+        printf("%s\n", items);
+    }
+    char *items = pop(q);
+    assert(items == NULL);
+    push(&q, "d");
+    push(&q, "e");
+    push(&q, "f");
+    print(q);
+    delete(q);
+    print(q);
+    char *s = (char *)malloc(10);
+    strcpy(s, "Hello");
+    push(&q, s);
+    strcpy(s, "World");
+    push(&q, s);
+    char *t = pop(q);
+    printf("s = %s\n", s);
+    printf("t = %s\n", t);
+    free(t);
+    free(s);
+    free(q);
+    
+    return 0;
+}
+
+
+
+
+https://www.geeksforgeeks.org/determinant-of-a-matrix/
+https://sdjee2015.wixsite.com/whyandhow/single-post/2017/01/22/determinant-of-a-matrix-using-recursion
+
+
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+double compute_det(int **a, int n) {
+    if (n == 1) {
+        return a[0];
+    }
+    
+}
+
+int main() {
+    int n;
+    scanf("%d", &n);
+    int *arr = malloc((n*n)*sizeof(int));
+    for (int i=0; i<n; i++) {
+        for (int j=0; j<n; j++) {
+            int item;
+            scanf("%d", &item);
+            arr[i*n+j] = item;
+        }
+    }
+    
+    printf("%.5f", compute_det(&arr, n));
+    
+    return 0;
+}
+
+
+
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
+
+#define N 4
+
+int determinantOfMatrix(int mat[N][N], int n)
+{
+    int num1, num2, det = 1, index, total = 1;
+    int temp[n + 1];
+
+    for (int i = 0; i < n; i++)
+    {
+        index = i;
+
+        while (index < n && mat[index][i] == 0)
+        {
+            index++;
+        }
+        if (index == n)
+        {
+            continue;
+        }
+        if (index != i)
+        {
+            for (int j = 0; j < n; j++)
+            {
+                int temp_swap = mat[index][j];
+                mat[index][j] = mat[i][j];
+                mat[i][j] = temp_swap;
+            }
+            det = det * pow(-1, index - i);
+        }
+
+        for (int j = 0; j < n; j++)
+        {
+            temp[j] = mat[i][j];
+        }
+
+        for (int j = i + 1; j < n; j++)
+        {
+            num1 = temp[i];
+            num2 = mat[j][i];
+
+            for (int k = 0; k < n; k++)
+            {
+                mat[j][k] = (num1 * mat[j][k]) - (num2 * temp[k]);
+            }
+            total = total * num1;
+        }
+    }
+
+    for (int i = 0; i < n; i++)
+    {
+        det = det * mat[i][i];
+    }
+
+    return (det / total);
+}
+
+int main()
+{
+    int mat[N][N] = {{1, 0, 2, -1},
+                     {3, 0, 0, 5},
+                     {2, 1, 4, -3},
+                     {1, 0, 5, 0}};
+    printf("Determinant of the matrix is : %d", determinantOfMatrix(mat, N));
+    return 0;
+}
+
+
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+double compute_det(int **a, int n) {
+    int total;
+    
+    if (n == 1) {
+        return (*a)[0];
+    }
+    
+    for (int i=0; i<n; i++) {
+        if (i%2 == 0) {
+            total += (*a)[i]*compute_det((&a)[n], n-1);
+        }
+        else {
+            total += -1*(*a)[i]*compute_det((&a)[n], n-1);
+        }
+    }
+    return total;
+}
+
+int main() {
+    int n;
+    scanf("%d", &n);
+    int *arr = malloc((n*n)*sizeof(int));
+    for (int i=0; i<n; i++) {
+        for (int j=0; j<n; j++) {
+            int item;
+            scanf("%d", &item);
+            arr[i*n+j] = item;
+        }
+    }
+    
+    printf("%.5f", compute_det(&arr, n));
+    
+    return 0;
+}
+
+
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+double compute_det(int **a, int n) {
+    int total = 0;
+    
+    if (n == 1) {
+        return (*a)[0];
+    }
+    
+    for (int k=0; k<n; k++) {
+        int *new_arr = malloc((n-1*n-1)*sizeof(int));
+        for (int i=1; i<n; i++) {
+            for (int j=0; j<n; j++) {
+                if (k == j) {
+                    continue;
+                }
+                new_arr[i*(n-1)+j] = (*a)[i*n+j];
+            }
+        }
+        if (k%2 == 0) {
+            total += (*a)[k]*compute_det(&new_arr, n-1);
+        }
+        else {
+            total += -1*(*a)[k]*compute_det(&new_arr, n-1);
+        }
+        free(new_arr);
+    }
+    return total;
+}
+
+int main() {
+    int n;
+    scanf("%d", &n);
+    int *arr = malloc((n*n)*sizeof(int));
+    for (int i=0; i<n; i++) {
+        for (int j=0; j<n; j++) {
+            int item;
+            scanf("%d", &item);
+            arr[i*n+j] = item;
+        }
+    }
+    
+    printf("%.5f", compute_det(&arr, n));
+    
+    return 0;
+}
+
+
+
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+double compute_det(int **a, int n) {
+    int total = 0;
+    int new_n = n-1;
+    
+    if (n == 1) {
+        return (*a)[0];
+    }
+    
+    for (int k=0; k<n; k++) {
+        int *new_arr = malloc(new_n*sizeof(int));
+        for (int i=1; i<n; i++) {
+            for (int j=0; j<n; j++) {
+                if (k == j) {
+                    continue;
+                }
+                new_arr[(i-1)*new_n+j] = (*a)[i*n+j];
+            }
+        }
+        if (k%2 == 0) {
+            total += (*a)[k]*compute_det(&new_arr, new_n);
+        }
+        else {
+            total += -1*(*a)[k]*compute_det(&new_arr, new_n);
+        }
+        free(new_arr);
+    }
+    return total;
+}
+
+int main() {
+    int n;
+    scanf("%d", &n);
+    int *arr = malloc((n*n)*sizeof(int));
+    for (int i=0; i<n; i++) {
+        for (int j=0; j<n; j++) {
+            int item;
+            scanf("%d", &item);
+            arr[i*n+j] = item;
+        }
+    }
+    
+    printf("%.5f", compute_det(&arr, n));
+    
+    return 0;
+}
+
+
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+double compute_det(int **a, int n) {
+    int total = 0;
+    int new_n = n-1;
+    
+    if (n == 1) {
+        return (*a)[0];
+    }
+    
+    for (int k=0; k<n; k++) {
+        int *new_arr = malloc(new_n*sizeof(int));
+        int count = 0;
+        for (int i=1; i<n; i++) {
+            for (int j=0; j<n; j++) {
+                if (k == j) {
+                    continue;
+                }
+                new_arr[count] = (*a)[i*n+j];
+                count++;
+                printf("%d\n", new_arr[0]);
+            }
+        }
+        if (k%2 == 0) {
+            total += (*a)[k]*compute_det(&new_arr, new_n);
+        }
+        else {
+            total += -1*(*a)[k]*compute_det(&new_arr, new_n);
+        }
+        free(new_arr);
+    }
+    return total;
+}
+
+int main() {
+    int n;
+    scanf("%d", &n);
+    int *arr = malloc((n*n)*sizeof(int));
+    for (int i=0; i<n; i++) {
+        for (int j=0; j<n; j++) {
+            int item;
+            scanf("%d", &item);
+            arr[i*n+j] = item;
+        }
+    }
+    
+    printf("%.5f", compute_det(&arr, n));
+    
+    return 0;
+}
+
+
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+double compute_det(int **a, int n) {
+    double total = 0;
+    int new_n = n-1;
+    
+    if (n == 1) {
+        return (*a)[0];
+    }
+    
+    for (int k=0; k<n; k++) {
+        int *new_arr = malloc(new_n*new_n*sizeof(double));
+        int count = 0;
+        for (int i=1; i<n; i++) {
+            for (int j=0; j<n; j++) {
+                if (k == j) {
+                    continue;
+                }
+                new_arr[count] = (*a)[i*n+j];
+                count++;
+            }
+        }
+        if (k%2 == 0) {
+            total += (*a)[k]*compute_det(&new_arr, new_n);
+        }
+        else {
+            total += -1*(*a)[k]*compute_det(&new_arr, new_n);
+        }
+        free(new_arr);
+    }
+    return total;
+}
+
+int main() {
+    int n;
+    scanf("%d", &n);
+    int *arr = malloc((n*n)*sizeof(double));
+    for (int i=0; i<n; i++) {
+        for (int j=0; j<n; j++) {
+            int item;
+            scanf("%d", &item);
+            arr[i*n+j] = item;
+        }
+    }
+    
+    printf("%.5f", compute_det(&arr, n));
+    
+    return 0;
+}
+
+
+
+
+#include <stdio.h>
+#include <stdlib.h>
+
+struct node_struct {
+    int data;
+    struct node_struct *right, *left;
+};
+
+typedef struct node_struct Node;
+
+void insert(Node **tree, int val) {
+    Node *temp = malloc(sizeof(Node));
+    temp->data = val;
+    temp->right = NULL;
+    temp->left = NULL;
+    if ((*tree) == NULL) {
+        (*tree) = temp;
+        return;
+    }
+    if (val < (*tree)->data) {
+        insert(&(*tree)->left, val);
+    }
+    else {
+        insert(&(*tree)->right, val);
+    }
+}
+
+void print(Node *tree) {
+    int first = 0;
+    char *space = malloc(sizeof(char)*100);
+    while (tree != NULL) {
+        if (first == 0) {
+            printf("%d\n", tree->data);
+        }
+        else {
+            for (int i=0; i<first-1; i++) {
+                printf("  ");
+            }
+            printf("|-%d\n", tree->data);
+        }
+        first++;
+        tree = tree->left;
+    }
+}
+
+void delete(Node *tree) {
+    
+}
+
+Node *lookup(Node **tree, int val) {
+    
+}
+
+int main(int argc, char **argv) {
+    Node *root = NULL;
+    Node *target = NULL;
+    
+    insert(&root, 7);
+    insert(&root, 2);
+    insert(&root, 4);
+    insert(&root, 10);
+    insert(&root, 1);
+    insert(&root, 15);
+    insert(&root, 12);
+    insert(&root, 11);
+    print(root);
+
+
+    return 0;
+}
+
+
+
+
+
+#include <stdio.h>
+#include <stdlib.h>
+
+struct node_struct {
+    int data;
+    struct node_struct *right, *left;
+};
+
+typedef struct node_struct Node;
+
+void insert(Node **tree, int val) {
+    Node *temp = malloc(sizeof(Node));
+    temp->data = val;
+    temp->right = NULL;
+    temp->left = NULL;
+    if ((*tree) == NULL) {
+        (*tree) = temp;
+        return;
+    }
+    if (val < (*tree)->data) {
+        insert(&(*tree)->left, val);
+    }
+    else {
+        insert(&(*tree)->right, val);
+    }
+}
+
+void print(Node *tree) {
+    if (tree != NULL) {
+        printf("%d\n", tree->data);
+        print(tree->left);
+        print(tree->right);
+    }
+    
+    
+}
+
+void delete(Node *tree) {
+    
+}
+
+Node *lookup(Node **tree, int val) {
+    if ((*tree) == NULL) {
+        return NULL;
+    }
+    if ((*tree)->data == val) {
+        return (*tree);
+    }
+    if ((*tree)->data < val) {
+        return lookup(&(*tree)->right, val);
+    }
+    if ((*tree)->data > val) {
+        return lookup(&(*tree)->left, val);
+    }
+}
+
+int main(int argc, char **argv) {
+    Node *root = NULL;
+    Node *target = NULL;
+    
+    insert(&root, 7);
+    insert(&root, 2);
+    insert(&root, 4);
+    insert(&root, 10);
+    insert(&root, 1);
+    insert(&root, 15);
+    insert(&root, 12);
+    insert(&root, 11);
+    print(root);
+    target = lookup(&root, 4);
+    if (target) {
+        printf("Found\n");
+    }
+    else {
+        printf("Not Found\n");
+    }
+    target = lookup(&root, 44);
+    if (target) {
+        printf("Found\n");
+    }
+    else {
+        printf("Not Found\n");
+    }
+    delete(root);
+
+    return 0;
+}
+
+
+#include <stdio.h>
+#include <stdlib.h>
+
+struct node_struct {
+    int data;
+    struct node_struct *right, *left;
+};
+
+typedef struct node_struct Node;
+
+void insert(Node **tree, int val) {
+    Node *temp = malloc(sizeof(Node));
+    temp->data = val;
+    temp->right = NULL;
+    temp->left = NULL;
+    if ((*tree) == NULL) {
+        (*tree) = temp;
+        return;
+    }
+    if (val < (*tree)->data) {
+        insert(&(*tree)->left, val);
+    }
+    else {
+        insert(&(*tree)->right, val);
+    }
+    return;
+}
+
+void printTwo(Node *tree, int current) {
+    if (tree != NULL) {
+        for (int i=0; i<current; i++) {
+        printf(" ");
+        }
+    printf("|-%d\n", tree->data);
+    printTwo(tree->left, current+2);
+    printTwo(tree->right, current+2);
+    }
+    return;
+}
+
+void print(Node *tree) {
+    int current = 0;
+    if (tree != NULL) {
+        printf("%d\n", tree->data);
+        printTwo(tree->left, current);
+        printTwo(tree->right, current);
+    } 
+    return;
+}
+
+int main(int argc, char **argv) {
+    Node *root = NULL;
+    Node *target = NULL;
+    
+    insert(&root, 7);
+    insert(&root, 2);
+    insert(&root, 4);
+    insert(&root, 10);
+    insert(&root, 1);
+    insert(&root, 15);
+    insert(&root, 12);
+    insert(&root, 11);
+    print(root);
+
+    return 0;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
