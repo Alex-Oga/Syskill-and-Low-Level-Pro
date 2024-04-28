@@ -1,0 +1,287 @@
+#include "cacheSim.h"
+
+// In this question, we will assume DRAM will take a 4-byte values starting from 0 to 
+void init_DRAM()
+{
+	unsigned int i=0;
+	DRAM = malloc(sizeof(char) * DRAM_SIZE);
+	for(i=0;i<DRAM_SIZE/4;i++)
+	{
+		*((unsigned int*)DRAM+i) = i;
+	}
+}
+
+void printCache()
+{
+	int i,j,k;
+	printf("===== L1 Cache Content =====\n");
+	for(i=0;i<2;i++)
+	{
+		printf("Set %d :", i);
+		for(j=0;j<2;j++)
+		{
+			printf(" {(TAG: 0x%x)", (unsigned int)(L1_cache[i][j].tag));
+			for(k=0;k<16;k++)
+				printf(" 0x%x,", (unsigned int)(L1_cache[i][j].data[k]));
+			printf(" |");
+		}
+		printf("\n");
+	}
+	printf("===== L2 Cache Content =====\n");
+	for(i=0;i<4;i++)
+	{
+		printf("Set %d :", i);
+		for(j=0;j<4;j++)
+		{
+			printf(" {(TAG: 0x%x)", (unsigned int)(L2_cache[i][j].tag));
+			for(k=0;k<16;k++)
+				printf(" 0x%x,", (unsigned int)(L2_cache[i][j].data[k]));
+			printf(" |");
+		}
+		printf("\n");
+	}
+}
+
+
+int L1lookup(u_int32_t address)
+{
+	u_int32_t tag = getL1Tag(address);
+	u_int32_t set = getL1SetID(address);
+	for(int i=0;i<2;i++)
+	{
+		if(L1_cache[set][i].tag == tag) return 1;
+	}
+	return 0;
+}
+
+int L2lookup(u_int32_t address)
+{
+	u_int32_t tag = getL2Tag(address);
+	u_int32_t set = getL2SetID(address);
+	for(int i=0;i<4;i++)
+	{
+		if(L2_cache[set][i].tag == tag) return 1;
+	}
+	return 0;
+
+}
+
+// Function to get the set ID for L1 cache based on the address.
+unsigned int getL1SetID(u_int32_t address)
+{
+    // Assuming a 2-way set associative cache with 2 sets.
+    return (address >> 4) & 0x01;
+}
+
+// Function to get the tag for L1 cache based on the address.
+unsigned int getL1Tag(u_int32_t address)
+{
+    // Assuming a 2-way set associative cache with a block size of 16 bytes.
+    return address >> 5;
+}
+
+// Function to get the set ID for L2 cache based on the address.
+unsigned int getL2SetID(u_int32_t address)
+{
+    // Assuming a 4-way set associative cache with 4 sets.
+    return (address >> 6) & 0x03;
+}
+
+// Function to get the tag for L2 cache based on the address.
+unsigned int getL2Tag(u_int32_t address)
+{
+    // Assuming a 4-way set associative cache with a block size of 16 bytes.
+    return address >> 7;
+}
+
+// Function to perform a cache access to the L1 cache.
+int L1access(u_int32_t address, int type, u_int32_t data)
+{
+    unsigned int setID = getL1SetID(address);
+    unsigned int tag = getL1Tag(address);
+
+    // Check if the data is in the L1 cache.
+    for (int i = 0; i < 2; i++)
+    {
+        if (L1_cache[setID][i].tag == tag)
+        {
+            // Cache hit, update the data in the cache block for write request.
+            if (type == 1) // Write request
+            {
+                L1_cache[setID][i].data[(address & 0x0F) >> 2] = (data >> ((address & 0x03) << 3)) & 0xFF; // Update the relevant byte in the cache block.
+            }
+            // Update the LRU timestamp of the cache block.
+            L1_cache[setID][i].timeStamp = cycles;
+            return 1; // Cache hit.
+        }
+    }
+
+    // Cache miss, need to replace the LRU cache block and update the cache.
+    cacheBlock blockFromDRAM; // Create a cache block.
+
+    blockFromDRAM.tag = tag;
+    blockFromDRAM.timeStamp = cycles; // Set the LRU timestamp to the current cycle count.
+
+    // Insert the new block into L1 cache using the LRU policy.
+    L1replace(blockFromDRAM, setID);
+
+    return 0; // Cache miss.
+}
+
+// Function to perform a cache access to the L2 cache.
+int L2access(u_int32_t address, int type, u_int32_t data)
+{
+    unsigned int setID = getL2SetID(address);
+    unsigned int tag = getL2Tag(address);
+
+    // Check if the data is in the L2 cache.
+    for (int i = 0; i < 4; i++)
+    {
+        if (L2_cache[setID][i].tag == tag)
+        {
+            // Cache hit, update the data in the cache block for write request.
+            if (type == 1) // Write request
+            {
+                L2_cache[setID][i].data[(address & 0x0F) >> 2] = (data >> ((address & 0x03) << 3)) & 0xFF; // Update the relevant byte in the cache block.
+            }
+            // Update the LRU timestamp of the cache block.
+            L2_cache[setID][i].timeStamp = cycles;
+            return 1; // Cache hit.
+        }
+    }
+
+    // Cache miss, need to replace the LRU cache block and update the cache.
+    cacheBlock blockFromDRAM; // Create a cache block.
+
+    blockFromDRAM.tag = tag;
+    blockFromDRAM.timeStamp = cycles; // Set the LRU timestamp to the current cycle count.
+
+    // Insert the new block into L2 cache using the LRU policy.
+    L2replace(blockFromDRAM, setID);
+
+    return 0; // Cache miss.
+}
+
+// Function to replace the LRU block in the L1 cache with the input block.
+void L1replace(cacheBlock block, int setID)
+{
+    // Find the least recently used cache block index in the set.
+    int LRUIndex = 0;
+    for (int i = 0; i < 2; i++)
+    {
+        if (L1_cache[setID][i].timeStamp < L1_cache[setID][LRUIndex].timeStamp)
+        {
+            LRUIndex = i;
+        }
+    }
+
+    // Replace the LRU cache block with the input block.
+    L1_cache[setID][LRUIndex] = block;
+}
+
+// Function to replace the LRU block in the L2 cache with the input block.
+void L2replace(cacheBlock block, int setID)
+{
+    // Find the least recently used cache block index in the set.
+    int LRUIndex = 0;
+    for (int i = 0; i < 4; i++)
+    {
+        if (L2_cache[setID][i].timeStamp < L2_cache[setID][LRUIndex].timeStamp)
+        {
+            LRUIndex = i;
+        }
+    }
+
+    // Replace the LRU cache block with the input block.
+    L2_cache[setID][LRUIndex] = block;
+}
+
+// Function to perform a read to a cache content. Return the 4-byte data content given by the address.
+u_int32_t read(u_int32_t address)
+{
+    unsigned int setID = getL1SetID(address);
+    unsigned int tag = getL1Tag(address);
+
+    // Check if the data is in the L1 cache.
+    for (int i = 0; i < 2; i++)
+    {
+        if (L1_cache[setID][i].tag == tag)
+        {
+            // Cache hit, update the LRU timestamp of the cache block.
+            L1_cache[setID][i].timeStamp = cycles;
+            // Return the data from the cache block.
+            return *((unsigned int *)(L1_cache[setID][i].data + ((address & 0x0F) >> 2) * 4));
+        }
+    }
+
+    // Cache miss, need to replace the LRU cache block and update the cache.
+    cacheBlock blockFromDRAM; // Create a cache block.
+
+    blockFromDRAM.tag = tag;
+    blockFromDRAM.timeStamp = cycles; // Set the LRU timestamp to the current cycle count.
+
+    // Insert the new block into L1 cache using the LRU policy.
+    L1replace(blockFromDRAM, setID);
+
+    // Return the data from the cache block.
+    return *((unsigned int *)(blockFromDRAM.data + ((address & 0x0F) >> 2) * 4));
+}
+
+// Function to perform a write to address by updating the byte at our address with data.
+void write(u_int32_t address, u_int32_t data)
+{
+    // For a write-through cache, we need to update both L1 and L2 caches as well as the DRAM.
+
+    // Update L1 cache.
+    int L1hit = L1access(address, 1, data);
+
+    if (L1hit == 1)
+    {
+        // If the data is already in L1 cache, we also need to update L2 cache.
+        L2access(address, 1, data);
+    }
+    else
+    {
+        // If the data is not in L1 cache, we need to update L2 cache and DRAM.
+        L2access(address, 1, data);
+        // In a real system, you would update the data in DRAM here.
+    }
+}
+
+
+int main()
+{
+	init_DRAM();
+	cacheAccess buffer;
+	int timeTaken=0;
+	FILE *trace = fopen("input.trace","r");
+	int L1hit = 0;
+	int L2hit = 0;
+	cycles = 0;
+	while(!feof(trace))
+	{
+		fscanf(trace,"%d %x %x", &buffer.readWrite, &buffer.address, &buffer.data);
+		printf("Processing the request for [R/W] = %d, Address = %x, data = %x\n", buffer.readWrite, buffer.address, buffer.data);
+
+		// Checking whether the current access is a hit or miss so that we can advance time correctly
+		if(L1lookup(buffer.address))// Cache hit
+		{
+			timeTaken = 1;
+			L1hit++;
+		}
+		else if(L2lookup(buffer.address))// L2 Cache Hit
+		{
+			L2hit++;
+			timeTaken = 5;
+		}
+		else timeTaken = 50;
+		if (buffer.readWrite) write(buffer.address, buffer.data);
+		else read(buffer.address);
+		cycles+=timeTaken;
+	}
+	printCache();
+	printf("Total cycles used = %ld\nL1 hits = %d, L2 hits = %d", cycles, L1hit, L2hit);
+	fclose(trace);
+	free(DRAM);
+	return 0;
+}

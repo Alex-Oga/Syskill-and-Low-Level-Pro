@@ -1,0 +1,228 @@
+1. The files to hand in are
+cacheLab.c cacheLab.h
+Zip up all the files as a5.zip
+2. Log on to Canvas, go to assignment 5 submission page and submit your zip
+
+• The cache has two levels
+• A cache block is 16 bytes.
+• Each address is accessing 1 bytes of data.
+• The L1 cache is a 64 Bytes, 2-way set associative cache.
+• The L2 cache is a 256 Bytes, 4-way set associative cache.
+• The cache is inclusive, which mean that data in L1 cache will also remain in the L2 cache. In other
+word, the data in L1 is a subset of the data in L2 (This assumption simplify your design).
+• The cache is using a least recently used (LRU) cache replacement policy. Note that this is simpler
+to implement than the LRU policy.
+
+• input.trace captures the trace of cache accesses. Each line in this file will contain three items:
+[0/1] [address] [data], where 0/1 is a single number (0 means this is a read request and 1 means
+this is a write request), [address] is a hexadecimal representation of the address of this particular
+cache access, and [data] is either 0 or the actual data the cache access need to write to (Note
+that a read request does not care about what the data is and you can ignore it. This piece of
+information is specifically for the write request).
+input.trace:
+0 1300 1
+0 1304 2
+0 1308 3
+0 130c 4
+0 1310 5
+0 1314 6
+0 1318 7
+0 131c 8
+0 1320 9
+1 130c 100
+1 13F0 101
+0 130c 100
+0 13F0 101
+0 130c 100
+0 13F0 101
+1 1d0c 100
+0 1eF0 101
+1 1314 101
+1 1d0c 100
+0 1eF0 101
+
+• The main() function is where the simulator handle reading the input trace. You do not need to
+touch this except for the line that open the trace file (you should use your own trace file to test
+your cache).
+• init_DRAM() initializes the value of DRAM. Please do not touch this.
+• printCache() prints the content of the cache, which you can call at any time to test your code.
+• readInput() reads one line of the input trace. This function is used in tandem with the main
+function and you do not have to touch this.
+• L1Lookup checks the cache and see if your access hits in the L1 cache or not
+• L2Lookup checks the cache and see if your access hits in the L2 cache or not
+• unsigned int getL1SetID(u_int32_t address) returns the setID assocated with the input
+address for L1 cache.
+• unsigned int getL1Tag(u_int32_t address) returns the tag assocated with the input address for L1 cache.
+• unsigned int getL2SetID(u_int32_t address) returns the setID assocated with the input
+address for L2 cache.
+• unsigned int getL2Tag(u_int32_t address) returns the tag assocated with the input address for L2 cache.
+• int L1access(u_int32_t address, int type, u_int32_t data) performs a L1 cache access. This function returns 1 if the input address is in the cache and 0 otherwise. Please note
+that this function UPDATE the cache content if we are writing to the cache.
+• int L2access(u_int32_t address, int type, u_int32_t data) performs a L2 cache access. This function returns 1 if the input address is in the cache and 0 otherwise. Please note
+that this function UPDATE the cache content if we are writing to the cache.
+
+
+u_int32_t read(u_int32_t address)
+{
+	L1access(address, 0, 0);
+	return 0;
+}
+
+void write(u_int32_t address, u_int32_t data)
+{
+	L1access(address, 1, data);
+}
+
+u_int32_t read(u_int32_t address)
+{
+    unsigned int setID = getL1SetID(address);
+    unsigned int tag = getL1Tag(address);
+    u_int32_t data = 0; 
+
+    for (int i = 0; i < 2; i++)
+    {
+        if (L1_cache[setID][i].tag == tag)
+        {
+            for (int j = 0; j < 4; j++)
+            {
+                data |= (L1_cache[setID][i].data[j] << (j * 8)); 
+            }
+            L1_cache[setID][i].timeStamp = cycles;
+            return data;
+        }
+    }
+
+    for (int i = 0; i < 4; i++)
+    {
+        data |= (L1_cache[setID][0].data[i] << (i * 8)); // Assuming 4-byte data.
+    }
+
+    return data;
+}
+
+void write(u_int32_t address, u_int32_t data)
+{
+    unsigned int setID = getL1SetID(address);
+    unsigned int tag = getL1Tag(address);
+
+    for (int i = 0; i < 2; i++)
+    {
+        if (L1_cache[setID][i].tag == tag)
+        {
+            L1_cache[setID][i].data[(address & 0x0F) >> 2] = (data >> ((address & 0x03) << 3)) & 0xFF;
+            L1_cache[setID][i].timeStamp = cycles;
+            break;
+        }
+    }
+
+    unsigned int L2_setID = getL2SetID(address);
+    unsigned int L2_tag = getL2Tag(address);
+    for (int i = 0; i < 4; i++)
+    {
+        if (L2_cache[L2_setID][i].tag == L2_tag)
+        {
+            L2_cache[L2_setID][i].data[(address & 0x0F) >> 2] = (data >> ((address & 0x03) << 3)) & 0xFF; 
+            L2_cache[L2_setID][i].timeStamp = cycles;
+            break;
+        }
+    }
+}
+
+
+
+-------------------------------------------------------------------
+
+
+
+// Function to get the set ID for L1 cache based on the address.
+unsigned int getL1SetID(u_int32_t address)
+{
+    // Assuming a 2-way set associative cache with 2 sets.
+    return address & 0x1;
+}
+
+// Function to get the tag for L1 cache based on the address.
+unsigned int getL1Tag(u_int32_t address)
+{
+    // Assuming a 2-way set associative cache with a block size of 16 bytes.
+    return address >> 5;
+}
+
+// Function to get the set ID for L2 cache based on the address.
+unsigned int getL2SetID(u_int32_t address)
+{
+    // Assuming a 4-way set associative cache with 4 sets.
+    return address & 0x3;
+}
+
+// Function to get the tag for L2 cache based on the address.
+unsigned int getL2Tag(u_int32_t address)
+{
+    // Assuming a 4-way set associative cache with a block size of 16 bytes.
+    return address >> 6;
+}
+
+
+
+----------------------------------------------------------------------------
+L1 Offset: last 4 bits
+L2 Offset: last 4 bits
+
+130c
+0001 0011 0000 1100
+Offset: 1100
+Tag: 0
+SetID: 0001 0011 000
+
+
+-------------------------------------------------------------------------------
+
+u_int32_t read(u_int32_t address)
+{
+    	unsigned int setID = getL1SetID(address);
+    	unsigned int tag = getL1Tag(address);
+
+    	for (int i = 0; i < 2; i++)
+    	{
+        	if (L1_cache[setID][i].tag == tag)
+        	{
+            		L1_cache[setID][i].timeStamp = cycles;
+            		return *((unsigned int *)(L1_cache[setID][i].data + ((address & 0x0F) >> 2) * 4));
+        	}
+    	}
+
+    	setID = getL2SetID(address);
+    	tag = getL2Tag(address);
+
+    	for (int i = 0; i < 4; i++)
+    	{
+        	if (L2_cache[setID][i].tag == tag)
+        	{
+            		L2_cache[setID][i].timeStamp = cycles;
+
+            		if (L1lookup(address)) {
+                		unsigned int L1SetID = getL1SetID(address);
+                		unsigned int L1Tag = getL1Tag(address);
+                		for (int j = 0; j < 2; j++) {
+                    			if (L1_cache[L1SetID][j].tag == L1Tag) {
+                        		L1_cache[L1SetID][j].data[(address & 0x0F) >> 2] = L2_cache[setID][i].data[(address & 0x0F) >> 2];
+                        		break;
+                    			}
+                		}
+            		}
+
+            		return *((unsigned int *)(L2_cache[setID][i].data + ((address & 0x0F) >> 2) * 4));
+        	}
+    	}
+
+    	cacheBlock blockFromDRAM; // Create a cache block.
+
+    	blockFromDRAM.tag = tag;
+    	blockFromDRAM.timeStamp = cycles;
+
+    	L2replace(blockFromDRAM, setID);
+    	L1replace(blockFromDRAM, getL1SetID(address));
+
+    	return *((unsigned int *)(blockFromDRAM.data + ((address & 0x0F) >> 2) * 4));
+}
+
